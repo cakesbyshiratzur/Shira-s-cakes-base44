@@ -7,7 +7,7 @@ const SERVICES = [
   icon: Cake,
   title: "Custom Cakes & Cupcakes",
   description: "Personalized cakes and cupcakes designed to match your vision and taste perfectly.",
-  image: "https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/aa7bc14ad_IMG_1684.jpeg",
+  image: "/media/aa7bc14ad_IMG_1684.jpeg",
   links: [
     { label: "Order Cakes", url: "https://forms.gle/Pa1PhVXnZYFkzCRw7" },
     { label: "Order Cupcakes", url: "https://forms.gle/MV4BAmHkWdeiNR2s9" }
@@ -17,7 +17,7 @@ const SERVICES = [
   icon: Cookie,
   title: "Custom Cookies",
   description: "Beautifully decorated cookies perfect for any occasion or celebration.",
-  image: "https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/75d63ae26_IMG_4094.jpeg",
+  image: "/media/75d63ae26_IMG_4094.jpeg",
   link: "https://forms.gle/Joe62J948DDuG5Yv9",
   cta: "Order Now"
 },
@@ -25,7 +25,7 @@ const SERVICES = [
   icon: ChefHat,
   title: "Baking 101 Workshops",
   description: "Learn the basics of baking in my fun and educational workshops.",
-  image: "https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/51d442215_IMG_2245.jpeg",
+  image: "/media/51d442215_IMG_2245.jpeg",
   link: "https://docs.google.com/forms/d/e/1FAIpQLSdgW8dm3mvVcmKLbzbbAkX8_tjh7Cm33g8jBLXqC5Mso87EUw/closedform",
   cta: "Sign Up"
 },
@@ -33,7 +33,7 @@ const SERVICES = [
   icon: UtensilsCrossed,
   title: "Catering Orders",
   description: "Assorted cookie and cupcake spreads perfect for office events, parties, and gatherings of any size.",
-  image: "https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/9366bd90c_IMG_3630.jpg",
+  image: "/media/9366bd90c_IMG_3630.jpg",
   link: "#contact",
   cta: "Get a Quote"
 }];

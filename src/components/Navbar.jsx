@@ -40,7 +40,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
           <button onClick={() => handleClick("#hero")} className="flex items-center gap-3 group">
             <img
-              src="https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/73e40c01c_logo2.png"
+              src="/media/73e40c01c_logo2.png"
               alt="Shira's Cakes logo"
               className="h-12 w-12 md:h-14 md:w-14 object-contain group-hover:scale-105 transition-transform duration-500"
             />

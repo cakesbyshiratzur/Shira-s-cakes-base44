@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Phone, Mail, Instagram, Facebook, MessageCircle, MapPin, Send } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
-import { base44 } from "@/api/base44Client";
 
 export default function ContactFooter() {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
@@ -11,22 +10,15 @@ export default function ContactFooter() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSending(true);
     setError(false);
-    try {
-      await base44.integrations.Core.SendEmail({
-        to: "cakesbyshiratzur@gmail.com",
-        subject: `New Contact Form Submission from ${formData.name}`,
-        body: `You have a new inquiry from your website contact form.\n\nName: ${formData.name}\nEmail: ${formData.email}\n\nMessage:\n${formData.message}`
-      });
-      setSent(true);
-      setFormData({ name: "", email: "", message: "" });
-      setTimeout(() => setSent(false), 4000);
-    } catch (err) {
-      setError(true);
-    } finally {
-      setSending(false);
-    }
+    setSending(true);
+    const subject = encodeURIComponent(`New Contact Form Submission from ${formData.name}`);
+    const body = encodeURIComponent(`Name: ${formData.name}\nEmail: ${formData.email}\n\n${formData.message}`);
+    window.location.href = `mailto:cakesbyshiratzur@gmail.com?subject=${subject}&body=${body}`;
+    setSent(true);
+    setFormData({ name: "", email: "", message: "" });
+    setSending(false);
+    setTimeout(() => setSent(false), 4000);
   };
 
   return (

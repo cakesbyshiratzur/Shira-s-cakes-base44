@@ -10,7 +10,7 @@ export default function AboutSection() {
           <ScrollReveal>
             <div className="relative">
               <img
-                src="https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/90404c6f4_D2350161-300E-4158-A2F0-0E598247F449.jpeg"
+                src="/media/90404c6f4_D2350161-300E-4158-A2F0-0E598247F449.jpeg"
                 alt="Shira Tzur — Baker and Cake Designer"
                 className="w-full max-w-md mx-auto lg:mx-0 aspect-[4/5] object-cover" />
               

@@ -4,34 +4,34 @@ import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
 
 const WORKSHOP_IMAGES = [
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/1ce158a78_587314879_1186307480302774_708987965433807899_n.jpg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/bebbf3231_611241383_1216405933959595_8238620053673918448_n.jpg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/0cf8b3344_611329350_1216405800626275_1720892442430875152_n.jpg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/7ff3195ca_612163989_1216405700626285_361652930909292785_n.jpg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/e74a61c9f_653062671_1272496555017199_5956341393016210943_n.jpg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/a2d86b8b9_653710104_1272496285017226_7564485539165464804_n.jpg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/d94947161_653892354_1272496531683868_6595714512536606475_n.jpg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/62398fe2d_654206872_1272496225017232_4496953975906761539_n.jpg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/54b27b8d1_653041159_1272496188350569_690403717777819957_n.jpg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/f86c4ddd7_654213134_1272496435017211_2340405064556593233_n.jpg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/954b50b7e_IMG_1585.jpeg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/8b29d640e_IMG_1592.jpeg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/407fa3b18_IMG_1584.jpeg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/53da7c0ab_IMG_1596.jpeg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/4914aaf22_IMG_1619.jpeg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/fe1ccd86d_IMG_1636.jpeg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/315b878e5_IMG_1642.jpeg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/22b59f3fa_IMG_1657.jpeg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/7a5b38556_IMG_1658.jpeg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/0f253d56f_IMG_1680.jpeg",
-"https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/f20ca6a42_IMG_1682.jpeg"
+"/media/1ce158a78_587314879_1186307480302774_708987965433807899_n.jpg",
+"/media/bebbf3231_611241383_1216405933959595_8238620053673918448_n.jpg",
+"/media/0cf8b3344_611329350_1216405800626275_1720892442430875152_n.jpg",
+"/media/7ff3195ca_612163989_1216405700626285_361652930909292785_n.jpg",
+"/media/e74a61c9f_653062671_1272496555017199_5956341393016210943_n.jpg",
+"/media/a2d86b8b9_653710104_1272496285017226_7564485539165464804_n.jpg",
+"/media/d94947161_653892354_1272496531683868_6595714512536606475_n.jpg",
+"/media/62398fe2d_654206872_1272496225017232_4496953975906761539_n.jpg",
+"/media/54b27b8d1_653041159_1272496188350569_690403717777819957_n.jpg",
+"/media/f86c4ddd7_654213134_1272496435017211_2340405064556593233_n.jpg",
+"/media/954b50b7e_IMG_1585.jpeg",
+"/media/8b29d640e_IMG_1592.jpeg",
+"/media/407fa3b18_IMG_1584.jpeg",
+"/media/53da7c0ab_IMG_1596.jpeg",
+"/media/4914aaf22_IMG_1619.jpeg",
+"/media/fe1ccd86d_IMG_1636.jpeg",
+"/media/315b878e5_IMG_1642.jpeg",
+"/media/22b59f3fa_IMG_1657.jpeg",
+"/media/7a5b38556_IMG_1658.jpeg",
+"/media/0f253d56f_IMG_1680.jpeg",
+"/media/f20ca6a42_IMG_1682.jpeg"
 ];
 
 const WORKSHOP_VIDEOS = [
-"https://media.base44.com/videos/public/6a462d3bf18568d86a2d8bbe/60e62a7b2_01bed8d572eb46de8b988c462c93d7fa.mov",
-"https://media.base44.com/videos/public/6a462d3bf18568d86a2d8bbe/3660b1eea_309ed92fa9d44f91be2654e3855f44e5.mov",
-"https://media.base44.com/videos/public/6a462d3bf18568d86a2d8bbe/5ff899eb3_31130b988da74137b5f7657fb526fb5a.mov",
-"https://media.base44.com/videos/public/6a462d3bf18568d86a2d8bbe/bae55a734_81203d7e312b4b56a4e46b270d43095d.mov"];
+"/media/60e62a7b2_01bed8d572eb46de8b988c462c93d7fa.mov",
+"/media/3660b1eea_309ed92fa9d44f91be2654e3855f44e5.mov",
+"/media/5ff899eb3_31130b988da74137b5f7657fb526fb5a.mov",
+"/media/bae55a734_81203d7e312b4b56a4e46b270d43095d.mov"];
 
 
 export default function WorkshopsSection() {

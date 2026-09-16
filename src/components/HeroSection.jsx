@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
 
-const HERO_IMAGE = "https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/672dfd492_generated_8167e011.png";
+const HERO_IMAGE = "/media/672dfd492_generated_8167e011.png";
 
 export default function HeroSection() {
   const scrollTo = (id) => {
@@ -84,7 +84,7 @@ export default function HeroSection() {
             className="relative">
             
             <div className="relative aspect-[3/4] max-h-[85vh]">
-              <img src="https://media.base44.com/images/public/6a462d3bf18568d86a2d8bbe/717404ff8_0.jpg"
+              <img src="/media/717404ff8_0.jpg"
 
               alt="Elegant custom cake with buttercream swirls and sugar flowers"
               className="w-full h-full object-cover" />

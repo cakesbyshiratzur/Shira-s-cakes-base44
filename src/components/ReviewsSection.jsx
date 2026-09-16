@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Star, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
-import { base44 } from "@/api/base44Client";
 
 const FALLBACK_REVIEWS = [
   {
@@ -37,25 +36,7 @@ const FALLBACK_REVIEWS = [
 export default function ReviewsSection() {
   const [reviews, setReviews] = useState(FALLBACK_REVIEWS);
   const [current, setCurrent] = useState(0);
-  const [loading, setLoading] = useState(true);
   const intervalRef = useRef(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await base44.functions.invoke("getReviews", {});
-        if (!cancelled && res.data && Array.isArray(res.data.reviews) && res.data.reviews.length > 0) {
-          setReviews(res.data.reviews);
-        }
-      } catch (e) {
-        // keep fallback reviews on error
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
 
   const startAutoplay = () => {
     intervalRef.current = setInterval(() => {
@@ -97,10 +78,7 @@ export default function ReviewsSection() {
           <div className="relative">
             <div className="text-center px-4 md:px-16 min-h-[240px] flex flex-col items-center justify-center">
               <Quote size={32} className="text-gold/30 mb-6" />
-              {loading ? (
-                <div className="w-10 h-10 border-2 border-rosewood/20 border-t-rosewood rounded-full animate-spin" />
-              ) : (
-                <>
+              <>
                   <p className="font-display text-xl md:text-2xl lg:text-3xl text-rosewood leading-relaxed italic mb-8 max-w-3xl">
                     "{reviews[current].text}"
                   </p>
@@ -112,12 +90,11 @@ export default function ReviewsSection() {
                   <p className="text-rosewood font-medium tracking-wider text-sm uppercase">
                     {reviews[current].name}
                   </p>
-                </>
-              )}
+              </>
             </div>
 
             {/* Navigation */}
-            {!loading && reviews.length > 1 && (
+            {reviews.length > 1 && (
               <div className="flex items-center justify-center gap-6 mt-10">
                 <button
                   onClick={() => goTo(-1)}
