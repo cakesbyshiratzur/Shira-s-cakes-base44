@@ -38,6 +38,22 @@ export default function ReviewsSection() {
   const [current, setCurrent] = useState(0);
   const intervalRef = useRef(null);
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/reviews")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data && Array.isArray(data.reviews) && data.reviews.length > 0) {
+          setReviews(data.reviews);
+          setCurrent(0);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const startAutoplay = () => {
     intervalRef.current = setInterval(() => {
       setCurrent((prev) => (prev + 1) % reviews.length);
