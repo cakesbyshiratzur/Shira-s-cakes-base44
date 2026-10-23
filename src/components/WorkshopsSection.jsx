@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, X, MessageCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
+import { useUploadedMedia } from "@/lib/useUploadedMedia";
 
-const WORKSHOP_IMAGES = [
+const BUILT_IN_WORKSHOP_IMAGES = [
 "/media/1ce158a78_587314879_1186307480302774_708987965433807899_n.jpg",
 "/media/bebbf3231_611241383_1216405933959595_8238620053673918448_n.jpg",
 "/media/0cf8b3344_611329350_1216405800626275_1720892442430875152_n.jpg",
@@ -38,6 +39,11 @@ export default function WorkshopsSection() {
   const [lightbox, setLightbox] = useState(null);
   const [showAll, setShowAll] = useState(false);
   const [videoIndex, setVideoIndex] = useState(0);
+  const media = useUploadedMedia();
+  const WORKSHOP_IMAGES = useMemo(
+    () => [...(media.workshops || []).map((m) => m.url), ...BUILT_IN_WORKSHOP_IMAGES],
+    [media]
+  );
 
   const navigateVideo = (dir) => {
     setVideoIndex((prev) => {

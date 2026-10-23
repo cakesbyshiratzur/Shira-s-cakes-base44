@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ScrollReveal from "@/components/ScrollReveal";
+import { useUploadedMedia } from "@/lib/useUploadedMedia";
 
 const BIRTHDAY_IMAGES = [
   "/media/4f717f4ad_IMG_4296.jpg",
@@ -107,24 +108,33 @@ const CATERING_IMAGES = [
 { src: "/media/2ae456d02_IMG_4136.mov", cat: "catering", type: "video" }];
 
 
-const ALL_IMAGES = [...BIRTHDAY_IMAGES, ...COOKIE_IMAGES, ...CATERING_IMAGES];
-
-const FILTERS = [
-{ label: "All", value: "all", count: ALL_IMAGES.length },
-{ label: "Cakes & Cupcakes", value: "cakes", count: BIRTHDAY_IMAGES.length },
-{ label: "Cookies", value: "cookies", count: COOKIE_IMAGES.length },
-{ label: "Catering", value: "catering", count: CATERING_IMAGES.length }];
-
-
 export default function GallerySection() {
   const [filter, setFilter] = useState("all");
   const [lightbox, setLightbox] = useState(null);
   const [showAll, setShowAll] = useState(false);
+  const media = useUploadedMedia();
+
+  const { ALL_IMAGES, FILTERS } = useMemo(() => {
+    const uploaded = (key, cat) => (media[key] || []).map((m) => ({ src: m.url, cat, type: "image" }));
+    const cakes = [...uploaded("gallery-cakes", "cakes"), ...BIRTHDAY_IMAGES];
+    const cookies = [...uploaded("gallery-cookies", "cookies"), ...COOKIE_IMAGES];
+    const catering = [...uploaded("gallery-catering", "catering"), ...CATERING_IMAGES];
+    const all = [...cakes, ...cookies, ...catering];
+    return {
+      ALL_IMAGES: all,
+      FILTERS: [
+        { label: "All", value: "all", count: all.length },
+        { label: "Cakes & Cupcakes", value: "cakes", count: cakes.length },
+        { label: "Cookies", value: "cookies", count: cookies.length },
+        { label: "Catering", value: "catering", count: catering.length },
+      ],
+    };
+  }, [media]);
 
   const filtered = useMemo(() => {
     if (filter === "all") return ALL_IMAGES;
     return ALL_IMAGES.filter((img) => img.cat === filter);
-  }, [filter]);
+  }, [filter, ALL_IMAGES]);
 
   const displayImages = showAll ? filtered : filtered.slice(0, 12);
 
