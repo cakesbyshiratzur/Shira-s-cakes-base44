@@ -98,10 +98,51 @@ function LoginForm({ onSuccess }) {
   );
 }
 
-function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized, categories, category, setCategory }) {
+const stamp = (p) => Number(p.pathname.split("/").pop().split("-")[0]) || 0;
+const newest = (list) =>
+  list.reduce((best, p) => {
+    if (!best) return p;
+    const a = new Date(p.uploadedAt).getTime();
+    const b = new Date(best.uploadedAt).getTime();
+    return a > b || (a === b && stamp(p) > stamp(best)) ? p : best;
+  }, null);
+
+function Thumb({ photo }) {
+  return photo.type === "video" ? (
+    <>
+      <video
+        src={`${photo.url}#t=0.1`}
+        preload="metadata"
+        muted
+        playsInline
+        className="w-full h-full object-cover bg-black"
+      />
+      <span className="absolute bottom-1 left-1 bg-black/60 text-white p-1">
+        <Film size={12} />
+      </span>
+    </>
+  ) : (
+    <img src={photo.url} alt="" loading="lazy" className="w-full h-full object-cover" />
+  );
+}
+
+function UploadPanel({
+  title,
+  prefix,
+  section,
+  photos,
+  latestOf,
+  onChanged,
+  onUnauthorized,
+  categories,
+  category,
+  setCategory,
+}) {
   const inputRef = useRef(null);
   const [items, setItems] = useState([]);
   const [deleting, setDeleting] = useState(null);
+  const [confirmPath, setConfirmPath] = useState(null);
+  const latest = newest(latestOf);
 
   const patch = (id, change) => setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...change } : it)));
 
@@ -158,7 +199,6 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
   };
 
   const remove = async (photo) => {
-    if (!window.confirm("Remove this from the website?")) return;
     setDeleting(photo.pathname);
     try {
       const res = await fetch("/api/admin/photo", {
@@ -173,7 +213,12 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
       onChanged();
     } finally {
       setDeleting(null);
+      setConfirmPath(null);
     }
+  };
+
+  const removeWithConfirm = (photo) => {
+    if (window.confirm("Remove this from the website?")) remove(photo);
   };
 
   const busy = items.some((it) => it.status === "waiting" || it.status === "uploading");
@@ -237,6 +282,48 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
         </ul>
       )}
 
+      {latest && (
+        <div className="mt-8 border border-rosewood/15 bg-blush/40 p-4 flex items-center gap-4">
+          <div className="relative w-20 h-20 shrink-0 overflow-hidden">
+            <Thumb photo={latest} />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs tracking-wider uppercase text-rosewood/60 mb-2">
+              Last added{latest.categoryLabel ? ` · ${latest.categoryLabel}` : ""}
+            </p>
+            {confirmPath === latest.pathname ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => remove(latest)}
+                  disabled={deleting === latest.pathname}
+                  className="inline-flex items-center gap-2 bg-red-800 text-white px-4 py-2 text-xs font-medium tracking-wider uppercase disabled:opacity-60"
+                >
+                  {deleting === latest.pathname && <Loader2 size={14} className="animate-spin" />}
+                  Yes, remove it
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmPath(null)}
+                  className="px-4 py-2 text-xs font-medium tracking-wider uppercase text-rosewood/70 border border-rosewood/20"
+                >
+                  Keep it
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setConfirmPath(latest.pathname)}
+                disabled={busy}
+                className="inline-flex items-center gap-2 border border-rosewood/40 text-rosewood px-4 py-2 text-xs font-medium tracking-wider uppercase disabled:opacity-40"
+              >
+                <Trash2 size={14} /> Remove last added
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       <h3 className="text-rosewood font-medium tracking-wider uppercase text-xs mt-10 mb-4">
         Uploaded photos &amp; videos ({photos.length})
       </h3>
@@ -246,25 +333,10 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
           {photos.map((photo) => (
             <div key={photo.pathname} className="relative aspect-square group">
-              {photo.type === "video" ? (
-                <>
-                  <video
-                    src={`${photo.url}#t=0.1`}
-                    preload="metadata"
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover bg-black"
-                  />
-                  <span className="absolute bottom-1 left-1 bg-black/60 text-white p-1">
-                    <Film size={12} />
-                  </span>
-                </>
-              ) : (
-                <img src={photo.url} alt="" loading="lazy" className="w-full h-full object-cover" />
-              )}
+              <Thumb photo={photo} />
               <button
                 type="button"
-                onClick={() => remove(photo)}
+                onClick={() => removeWithConfirm(photo)}
                 disabled={deleting === photo.pathname}
                 aria-label="Remove item"
                 className="absolute top-1 right-1 w-8 h-8 bg-black/60 text-white flex items-center justify-center"
@@ -365,6 +437,9 @@ export default function Admin() {
               prefix={category_.prefix}
               section={category_.key}
               photos={media[category_.key] || []}
+              latestOf={GALLERY_CATEGORIES.flatMap((c) =>
+                (media[c.key] || []).map((p) => ({ ...p, categoryLabel: c.label }))
+              )}
               categories={GALLERY_CATEGORIES}
               category={category}
               setCategory={setCategory}
@@ -376,6 +451,7 @@ export default function Admin() {
               prefix={WORKSHOPS.prefix}
               section={WORKSHOPS.key}
               photos={media[WORKSHOPS.key] || []}
+              latestOf={media[WORKSHOPS.key] || []}
               onChanged={loadMedia}
               onUnauthorized={() => setState("out")}
             />
