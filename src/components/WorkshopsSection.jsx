@@ -28,7 +28,7 @@ const BUILT_IN_WORKSHOP_IMAGES = [
 "/media/f20ca6a42_IMG_1682.jpeg"
 ];
 
-const WORKSHOP_VIDEOS = [
+const BUILT_IN_WORKSHOP_VIDEOS = [
 "/media/60e62a7b2_01bed8d572eb46de8b988c462c93d7fa.mov",
 "/media/3660b1eea_309ed92fa9d44f91be2654e3855f44e5.mov",
 "/media/5ff899eb3_31130b988da74137b5f7657fb526fb5a.mov",
@@ -41,7 +41,17 @@ export default function WorkshopsSection() {
   const [videoIndex, setVideoIndex] = useState(0);
   const media = useUploadedMedia();
   const WORKSHOP_IMAGES = useMemo(
-    () => [...(media.workshops || []).map((m) => m.url), ...BUILT_IN_WORKSHOP_IMAGES],
+    () => [
+      ...(media.workshops || []).filter((m) => m.type !== "video").map((m) => m.url),
+      ...BUILT_IN_WORKSHOP_IMAGES,
+    ],
+    [media]
+  );
+  const WORKSHOP_VIDEOS = useMemo(
+    () => [
+      ...(media.workshops || []).filter((m) => m.type === "video").map((m) => m.url),
+      ...BUILT_IN_WORKSHOP_VIDEOS,
+    ],
     [media]
   );
 
@@ -90,7 +100,9 @@ Click through the videos below recapping each session!!
                 controls
                 className="w-full h-full object-contain bg-black">
                 
-                <source src={WORKSHOP_VIDEOS[videoIndex]} type="video/mp4" />
+                <source
+                  src={WORKSHOP_VIDEOS[videoIndex]}
+                  type={WORKSHOP_VIDEOS[videoIndex].endsWith(".webm") ? "video/webm" : "video/mp4"} />
                 Your browser does not support the video tag.
               </video>
               {WORKSHOP_VIDEOS.length > 1 &&

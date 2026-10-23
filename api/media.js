@@ -1,5 +1,5 @@
 import { list } from "@vercel/blob";
-import { SECTIONS } from "./_lib/sections.js";
+import { SECTIONS, mediaTypeOf } from "./_lib/sections.js";
 
 async function listAll(prefix) {
   const blobs = [];
@@ -18,7 +18,12 @@ export default async function handler(req, res) {
       Object.entries(SECTIONS).map(async ([section, prefix]) => {
         const blobs = await listAll(prefix);
         blobs.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
-        return [section, blobs.map((b) => ({ url: b.url, pathname: b.pathname, uploadedAt: b.uploadedAt }))];
+        return [section, blobs.map((b) => ({
+          url: b.url,
+          pathname: b.pathname,
+          type: mediaTypeOf(b.pathname) || "image",
+          uploadedAt: b.uploadedAt,
+        }))];
       }),
     );
     const noStore = req.query?.fresh === "1";

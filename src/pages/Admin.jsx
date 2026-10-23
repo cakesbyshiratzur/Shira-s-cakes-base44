@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
-import { Camera, Check, Loader2, LogOut, Trash2, Upload as UploadIcon, X } from "lucide-react";
+import { Camera, Check, Film, Loader2, LogOut, Trash2, Upload as UploadIcon, X } from "lucide-react";
 
 const GALLERY_CATEGORIES = [
   { key: "gallery-cakes", label: "Cakes & Cupcakes", prefix: "gallery/cakes/" },
@@ -9,6 +9,15 @@ const GALLERY_CATEGORIES = [
 ];
 const WORKSHOPS = { key: "workshops", label: "Baking 101 Workshops", prefix: "workshops/" };
 const MAX_EDGE = 2400;
+const MAX_VIDEO_BYTES = 200 * 1024 * 1024;
+const VIDEO_TYPES = { mp4: "video/mp4", mov: "video/quicktime", webm: "video/webm" };
+
+function videoInfo(file) {
+  const ext = (file.name.split(".").pop() || "").toLowerCase();
+  const type = Object.values(VIDEO_TYPES).includes(file.type) ? file.type : VIDEO_TYPES[ext];
+  const isVideo = file.type.startsWith("video/") || Boolean(VIDEO_TYPES[ext]);
+  return { isVideo, type, ext: ext in VIDEO_TYPES ? ext : null };
+}
 
 async function prepareImage(file) {
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
@@ -112,12 +121,25 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
     for (const item of queued) {
       patch(item.id, { status: "uploading" });
       try {
-        const blob = await prepareImage(item.file);
-        await upload(`${prefix}${Date.now()}-${safeBase(item.file.name)}.jpg`, blob, {
-          access: "public",
-          handleUploadUrl: "/api/admin/upload",
-          contentType: "image/jpeg",
-        });
+        const video = videoInfo(item.file);
+        if (video.isVideo) {
+          if (!video.type || !video.ext) throw new Error("This video format isn't supported. Use MP4, MOV or WebM.");
+          if (item.file.size > MAX_VIDEO_BYTES) throw new Error("This video is larger than 200 MB.");
+          await upload(`${prefix}${Date.now()}-${safeBase(item.file.name)}.${video.ext}`, item.file, {
+            access: "public",
+            handleUploadUrl: "/api/admin/upload",
+            contentType: video.type,
+            multipart: true,
+            onUploadProgress: ({ percentage }) => patch(item.id, { progress: Math.round(percentage) }),
+          });
+        } else {
+          const blob = await prepareImage(item.file);
+          await upload(`${prefix}${Date.now()}-${safeBase(item.file.name)}.jpg`, blob, {
+            access: "public",
+            handleUploadUrl: "/api/admin/upload",
+            contentType: "image/jpeg",
+          });
+        }
         patch(item.id, { status: "done" });
       } catch (error) {
         if (/not authorized/i.test(error.message)) {
@@ -127,7 +149,7 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
         patch(item.id, {
           status: "error",
           message: /createImageBitmap|decode|source image|could not process/i.test(error.message)
-            ? "This photo format isn't supported. Try a JPG or PNG."
+            ? "This file isn't supported. Use a JPG/PNG photo or an MP4/MOV/WebM video."
             : error.message,
         });
       }
@@ -136,7 +158,7 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
   };
 
   const remove = async (photo) => {
-    if (!window.confirm("Remove this photo from the website?")) return;
+    if (!window.confirm("Remove this from the website?")) return;
     setDeleting(photo.pathname);
     try {
       const res = await fetch("/api/admin/photo", {
@@ -159,7 +181,7 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
   return (
     <section className="bg-white border border-rosewood/10 p-5 sm:p-8 mb-10">
       <h2 className="font-display text-3xl font-semibold text-rosewood mb-1">{title}</h2>
-      <p className="text-rosewood/60 text-sm mb-6">New photos appear first on the website within a minute.</p>
+      <p className="text-rosewood/60 text-sm mb-6">New photos and videos appear first on the website within a minute.</p>
 
       {categories && (
         <div className="flex flex-wrap gap-2 mb-6">
@@ -181,7 +203,7 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/*,video/mp4,video/quicktime,video/webm,.mov,.mp4,.webm"
         multiple
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
@@ -193,7 +215,7 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
         className="w-full sm:w-auto inline-flex items-center justify-center gap-3 bg-rosewood text-ivory px-8 py-4 text-sm font-medium tracking-[0.15em] uppercase disabled:opacity-50"
       >
         {busy ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
-        {busy ? "Uploading..." : "Choose photos"}
+        {busy ? "Uploading..." : "Choose photos or videos"}
       </button>
 
       {items.length > 0 && (
@@ -206,6 +228,9 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
                 <Loader2 size={16} className={`shrink-0 ${it.status === "uploading" ? "animate-spin" : "opacity-30"}`} />
               )}
               <span className="truncate">{it.name}</span>
+              {it.status === "uploading" && typeof it.progress === "number" && (
+                <span className="text-rosewood/60 text-xs shrink-0">{it.progress}%</span>
+              )}
               {it.message && <span className="text-red-700 text-xs">{it.message}</span>}
             </li>
           ))}
@@ -213,7 +238,7 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
       )}
 
       <h3 className="text-rosewood font-medium tracking-wider uppercase text-xs mt-10 mb-4">
-        Uploaded photos ({photos.length})
+        Uploaded photos &amp; videos ({photos.length})
       </h3>
       {photos.length === 0 ? (
         <p className="text-rosewood/50 text-sm">Nothing uploaded here yet.</p>
@@ -221,12 +246,27 @@ function UploadPanel({ title, prefix, section, photos, onChanged, onUnauthorized
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
           {photos.map((photo) => (
             <div key={photo.pathname} className="relative aspect-square group">
-              <img src={photo.url} alt="" loading="lazy" className="w-full h-full object-cover" />
+              {photo.type === "video" ? (
+                <>
+                  <video
+                    src={`${photo.url}#t=0.1`}
+                    preload="metadata"
+                    muted
+                    playsInline
+                    className="w-full h-full object-cover bg-black"
+                  />
+                  <span className="absolute bottom-1 left-1 bg-black/60 text-white p-1">
+                    <Film size={12} />
+                  </span>
+                </>
+              ) : (
+                <img src={photo.url} alt="" loading="lazy" className="w-full h-full object-cover" />
+              )}
               <button
                 type="button"
                 onClick={() => remove(photo)}
                 disabled={deleting === photo.pathname}
-                aria-label="Remove photo"
+                aria-label="Remove item"
                 className="absolute top-1 right-1 w-8 h-8 bg-black/60 text-white flex items-center justify-center"
               >
                 {deleting === photo.pathname ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
@@ -340,7 +380,7 @@ export default function Admin() {
               onUnauthorized={() => setState("out")}
             />
             <p className="text-rosewood/50 text-xs text-center flex items-center justify-center gap-2">
-              <UploadIcon size={12} /> Photos are resized automatically before uploading.
+              <UploadIcon size={12} /> Photos are resized automatically. Videos upload as they are (up to 200 MB each).
             </p>
           </>
         )}

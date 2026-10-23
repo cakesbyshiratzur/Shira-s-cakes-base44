@@ -115,7 +115,7 @@ export default function GallerySection() {
   const media = useUploadedMedia();
 
   const { ALL_IMAGES, FILTERS } = useMemo(() => {
-    const uploaded = (key, cat) => (media[key] || []).map((m) => ({ src: m.url, cat, type: "image" }));
+    const uploaded = (key, cat) => (media[key] || []).map((m) => ({ src: m.url, cat, type: m.type === "video" ? "video" : "image", uploaded: true }));
     const cakes = [...uploaded("gallery-cakes", "cakes"), ...BIRTHDAY_IMAGES];
     const cookies = [...uploaded("gallery-cookies", "cookies"), ...COOKIE_IMAGES];
     const catering = [...uploaded("gallery-catering", "catering"), ...CATERING_IMAGES];
@@ -207,10 +207,11 @@ export default function GallerySection() {
                 <div className={`relative overflow-hidden ${isShowstopper ? "aspect-square" : "aspect-square"}`}>
                   {img.type === "video" ?
                   <video
-                    src={img.src}
+                    src={img.uploaded ? `${img.src}#t=0.1` : img.src}
                     muted
                     loop
-                    autoPlay
+                    autoPlay={!img.uploaded}
+                    preload={img.uploaded ? "metadata" : "auto"}
                     playsInline
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" /> :
 

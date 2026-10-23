@@ -1,6 +1,13 @@
 import { handleUpload } from "@vercel/blob/client";
 import { isAuthenticated } from "../_lib/auth.js";
-import { isAllowedPathname } from "../_lib/sections.js";
+import {
+  IMAGE_TYPES,
+  MAX_IMAGE_BYTES,
+  MAX_VIDEO_BYTES,
+  VIDEO_TYPES,
+  isAllowedPathname,
+  mediaTypeOf,
+} from "../_lib/sections.js";
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
@@ -16,9 +23,10 @@ export default async function handler(req, res) {
       onBeforeGenerateToken: async (pathname) => {
         if (!isAuthenticated(req)) throw new Error("Not authorized");
         if (!isAllowedPathname(pathname)) throw new Error("Invalid upload location");
+        const isVideo = mediaTypeOf(pathname) === "video";
         return {
-          allowedContentTypes: ["image/jpeg", "image/png", "image/webp"],
-          maximumSizeInBytes: 15 * 1024 * 1024,
+          allowedContentTypes: isVideo ? VIDEO_TYPES : IMAGE_TYPES,
+          maximumSizeInBytes: isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES,
           addRandomSuffix: true,
         };
       },
