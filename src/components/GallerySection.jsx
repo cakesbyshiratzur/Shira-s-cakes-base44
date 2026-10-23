@@ -297,7 +297,7 @@ export default function GallerySection() {
             exit={{ opacity: 0, scale: 0.95 }}
             src={filtered[lightbox]?.src}
             alt="Gallery image"
-            className="max-h-[85vh] max-w-[90vw] object-contain hidden"
+            className="max-h-[85vh] max-w-[90vw] object-contain"
             onClick={(e) => e.stopPropagation()} />
 
           }
