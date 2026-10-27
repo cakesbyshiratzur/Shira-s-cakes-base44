@@ -1,7 +1,10 @@
 import React from "react";
 import ScrollReveal from "@/components/ScrollReveal";
+import { useSiteImage } from "@/lib/siteImages";
 
 export default function AboutSection() {
+  const aboutImage = useSiteImage("site-about");
+
   return (
     <section id="about" className="py-24 lg:py-36 bg-ivory">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -9,10 +12,14 @@ export default function AboutSection() {
           {/* Image */}
           <ScrollReveal>
             <div className="relative">
+              {aboutImage ?
               <img
-                src="/media/90404c6f4_D2350161-300E-4158-A2F0-0E598247F449.jpeg"
+                src={aboutImage}
                 alt="Shira Tzur — Baker and Cake Designer"
-                className="w-full max-w-md mx-auto lg:mx-0 aspect-[4/5] object-cover" />
+                className="w-full max-w-md mx-auto lg:mx-0 aspect-[4/5] object-cover" /> :
+
+              <div className="w-full max-w-md mx-auto lg:mx-0 aspect-[4/5]" />
+              }
               
               <div className="absolute -right-4 top-8 bottom-8 w-px bg-gold/30 hidden lg:block" />
 

@@ -1,13 +1,15 @@
 import React from "react";
 import { Cake, Cookie, ChefHat, UtensilsCrossed } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
+import { siteImageUrl } from "@/lib/siteImages";
+import { useUploadedMediaStatus } from "@/lib/useUploadedMedia";
 
 const SERVICES = [
 {
   icon: Cake,
   title: "Custom Cakes & Cupcakes",
   description: "Personalized cakes and cupcakes designed to match your vision and taste perfectly.",
-  image: "/media/aa7bc14ad_IMG_1684.jpeg",
+  imageKey: "site-service-cakes",
   links: [
     { label: "Order Cakes", url: "https://forms.gle/Pa1PhVXnZYFkzCRw7" },
     { label: "Order Cupcakes", url: "https://forms.gle/MV4BAmHkWdeiNR2s9" }
@@ -17,7 +19,7 @@ const SERVICES = [
   icon: Cookie,
   title: "Custom Cookies",
   description: "Beautifully decorated cookies perfect for any occasion or celebration.",
-  image: "/media/75d63ae26_IMG_4094.jpeg",
+  imageKey: "site-service-cookies",
   link: "https://forms.gle/Joe62J948DDuG5Yv9",
   cta: "Order Now"
 },
@@ -25,7 +27,7 @@ const SERVICES = [
   icon: ChefHat,
   title: "Baking 101 Workshops",
   description: "Learn the basics of baking in my fun and educational workshops.",
-  image: "/media/51d442215_IMG_2245.jpeg",
+  imageKey: "site-service-workshops",
   link: "https://docs.google.com/forms/d/e/1FAIpQLSdgW8dm3mvVcmKLbzbbAkX8_tjh7Cm33g8jBLXqC5Mso87EUw/closedform",
   cta: "Sign Up"
 },
@@ -33,13 +35,15 @@ const SERVICES = [
   icon: UtensilsCrossed,
   title: "Catering Orders",
   description: "Assorted cookie and cupcake spreads perfect for office events, parties, and gatherings of any size.",
-  image: "/media/9366bd90c_IMG_3630.jpg",
+  imageKey: "site-service-catering",
   link: "#contact",
   cta: "Get a Quote"
 }];
 
 
 export default function ServicesSection() {
+  const media = useUploadedMediaStatus();
+
   return (
     <section id="services" className="py-24 lg:py-36 bg-blush">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -61,10 +65,12 @@ export default function ServicesSection() {
           <ScrollReveal key={service.title} delay={i * 0.12}>
               <div className="group bg-ivory h-full flex flex-col">
                 <div className="aspect-[4/3] overflow-hidden">
+                  {media &&
                   <img
-                  src={service.image}
+                  src={siteImageUrl(media, service.imageKey)}
                   alt={service.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  }
                 
                 </div>
                 <div className="p-8 flex flex-col flex-1">

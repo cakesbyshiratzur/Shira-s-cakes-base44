@@ -1,10 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { MapPin } from "lucide-react";
-
-const HERO_IMAGE = "/media/672dfd492_generated_8167e011.png";
+import { useSiteImage } from "@/lib/siteImages";
 
 export default function HeroSection() {
+  const heroImage = useSiteImage("site-hero");
+
   const scrollTo = (id) => {
     const el = document.querySelector(id);
     if (el) el.scrollIntoView({ behavior: "smooth" });
@@ -84,10 +85,11 @@ export default function HeroSection() {
             className="relative">
             
             <div className="relative aspect-[3/4] max-h-[85vh]">
-              <img src="/media/717404ff8_0.jpg"
-
+              {heroImage &&
+              <img src={heroImage}
               alt="Elegant custom cake with buttercream swirls and sugar flowers"
               className="w-full h-full object-cover" />
+              }
               
               {/* Gold accent line */}
               <div className="absolute -left-4 top-8 bottom-8 w-px bg-gold/40" />

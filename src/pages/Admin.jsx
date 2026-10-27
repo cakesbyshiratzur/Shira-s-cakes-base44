@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { upload } from "@vercel/blob/client";
-import { Camera, Check, Film, Loader2, LogOut, Trash2, Upload as UploadIcon, X } from "lucide-react";
+import { Camera, Check, Film, Loader2, LogOut, RotateCcw, Trash2, Upload as UploadIcon, X } from "lucide-react";
+import { SITE_IMAGES, siteImageUrl } from "@/lib/siteImages";
 
 const GALLERY_CATEGORIES = [
   { key: "gallery-cakes", label: "Cakes & Cupcakes", prefix: "gallery/cakes/" },
@@ -352,6 +353,133 @@ function UploadPanel({
   );
 }
 
+async function deletePhoto(pathname) {
+  const res = await fetch("/api/admin/photo", {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ pathname }),
+  });
+  if (res.status === 401) throw new Error("Not authorized");
+}
+
+function SitePhotoCard({ slot, media, onChanged, onUnauthorized }) {
+  const inputRef = useRef(null);
+  const [busy, setBusy] = useState(null);
+  const [error, setError] = useState("");
+  const uploaded = media[slot.key] || [];
+  const current = siteImageUrl(media, slot.key);
+
+  const run = async (kind, task) => {
+    setBusy(kind);
+    setError("");
+    try {
+      await task();
+      await onChanged();
+    } catch (err) {
+      if (/not authorized/i.test(err.message)) return onUnauthorized();
+      setError(
+        /createImageBitmap|decode|source image|could not process/i.test(err.message)
+          ? "This file isn't supported. Use a JPG or PNG photo."
+          : err.message
+      );
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const replace = (file) => {
+    if (inputRef.current) inputRef.current.value = "";
+    if (!file) return;
+    run("upload", async () => {
+      const blob = await prepareImage(file);
+      const prefix = `site/${slot.key.replace(/^site-/, "")}/`;
+      await upload(`${prefix}${Date.now()}-${safeBase(file.name)}.jpg`, blob, {
+        access: "public",
+        handleUploadUrl: "/api/admin/upload",
+        contentType: "image/jpeg",
+      });
+      // The new photo is live, so the ones it replaced can go.
+      for (const old of uploaded) await deletePhoto(old.pathname);
+    });
+  };
+
+  const restore = () => {
+    if (!window.confirm("Go back to the original photo?")) return;
+    run("restore", async () => {
+      for (const old of uploaded) await deletePhoto(old.pathname);
+    });
+  };
+
+  return (
+    <div className="border border-rosewood/10 bg-blush/30 flex flex-col">
+      <div className={`relative ${slot.aspect} max-h-72 w-full overflow-hidden bg-blush`}>
+        <img src={current} alt="" className="w-full h-full object-cover" />
+        {busy && (
+          <div className="absolute inset-0 bg-white/60 flex items-center justify-center">
+            <Loader2 size={24} className="animate-spin text-rosewood" />
+          </div>
+        )}
+      </div>
+      <div className="p-4 flex flex-col gap-3 flex-1">
+        <div>
+          <p className="text-rosewood font-medium text-sm">{slot.label}</p>
+          <p className="text-rosewood/50 text-xs">{uploaded.length ? "Your photo" : "Original photo"}</p>
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => replace(e.target.files?.[0])}
+        />
+        <div className="flex flex-wrap gap-2 mt-auto">
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            disabled={Boolean(busy)}
+            className="inline-flex items-center gap-2 bg-rosewood text-ivory px-4 py-2 text-xs font-medium tracking-wider uppercase disabled:opacity-50"
+          >
+            <Camera size={14} /> {busy === "upload" ? "Uploading..." : "Replace photo"}
+          </button>
+          {uploaded.length > 0 && (
+            <button
+              type="button"
+              onClick={restore}
+              disabled={Boolean(busy)}
+              className="inline-flex items-center gap-2 border border-rosewood/30 text-rosewood px-4 py-2 text-xs font-medium tracking-wider uppercase disabled:opacity-50"
+            >
+              <RotateCcw size={14} /> Original
+            </button>
+          )}
+        </div>
+        {error && <p className="text-red-700 text-xs">{error}</p>}
+      </div>
+    </div>
+  );
+}
+
+function SitePhotosPanel({ media, onChanged, onUnauthorized }) {
+  return (
+    <section className="bg-white border border-rosewood/10 p-5 sm:p-8 mb-10">
+      <h2 className="font-display text-3xl font-semibold text-rosewood mb-1">Website Photos</h2>
+      <p className="text-rosewood/60 text-sm mb-6">
+        Replace the photo in each part of the website. Changes show on the website within a minute.
+      </p>
+      <div className="grid sm:grid-cols-2 gap-4">
+        {SITE_IMAGES.map((slot) => (
+          <SitePhotoCard
+            key={slot.key}
+            slot={slot}
+            media={media}
+            onChanged={onChanged}
+            onUnauthorized={onUnauthorized}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function Admin() {
   const [state, setState] = useState("loading");
   const [media, setMedia] = useState({});
@@ -432,6 +560,7 @@ export default function Admin() {
 
         {state === "in" && (
           <>
+            <SitePhotosPanel media={media} onChanged={loadMedia} onUnauthorized={() => setState("out")} />
             <UploadPanel
               title="Photo Gallery"
               prefix={category_.prefix}
